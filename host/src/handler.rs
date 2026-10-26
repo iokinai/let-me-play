@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use enigo::{Direction, Enigo, Keyboard, Mouse};
+use enigo::{Direction, Enigo, Mouse};
 use let_me_play_models::{
     Event, InputEvent, MouseButton, MouseInput, MouseMove, SequenceEvent, SingleEvent,
 };
@@ -8,7 +8,7 @@ use tokio::sync::Mutex;
 
 use crate::{
     error::{HandlerError, LmpError},
-    mappings::char_to_keycode,
+    mappings::send_input,
 };
 
 pub struct Handler {
@@ -51,12 +51,7 @@ impl Handler {
     async fn handle_keyboard_input(&self, input: char) -> Result<(), LmpError> {
         let mut enigo = self.enigo.lock().await;
 
-        let code = char_to_keycode(input)
-            .ok_or(LmpError::HandlerError(HandlerError::KeyIsNotSupported))?;
-
-        enigo
-            .raw(code, Direction::Click)
-            .map_err(|_| LmpError::HandlerError(HandlerError::CouldNotSendInput))?;
+        send_input(&mut enigo, input)?;
 
         Ok(())
     }

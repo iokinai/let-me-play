@@ -75,7 +75,7 @@ export default function SingleEventForm({
               value={keyChar}
               onChange={(e) => {
                 const val = e.target.value.toLowerCase();
-                if (/^[a-z]?$/.test(val)) setKeyChar(val);
+                if (/^[a-z0-9]?$/.test(val)) setKeyChar(val);
               }}
               className="w-28 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-center text-lg font-mono text-emerald-400 font-bold focus:outline-none focus:border-emerald-500"
             />

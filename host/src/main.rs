@@ -31,7 +31,7 @@ fn server_url(proto: &str) -> String {
 }
 
 async fn run() -> Result<(), LmpError> {
-    let handler = Handler::new(Enigo::new(&Settings::default()).unwrap(), 500);
+    let handler = Handler::new(Enigo::new(&Settings::default()).unwrap(), 50);
     let http_server_url = server_url("http");
     let ws_url = server_url("ws");
 

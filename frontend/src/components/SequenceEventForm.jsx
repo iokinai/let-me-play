@@ -60,7 +60,7 @@ export default function SequenceEventForm({
                     value={item.key}
                     onChange={(e) => {
                       const val = e.target.value.toLowerCase();
-                      if (/^[a-z]?$/.test(val))
+                      if (/^[a-z0-9]?$/.test(val))
                         onUpdateStep(item.id, "key", val);
                     }}
                     className="w-12 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-center font-bold text-emerald-400 focus:outline-none"
