@@ -1,0 +1,21 @@
+[package]
+name = "let-me-play-host"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+enigo = { version = "0.6.1", default-features = false, features = [
+    "libei_tokio",
+] }
+thiserror = "2.0.21"
+tokio = { version = "1.54.1", features = ["full"] }
+trl = "1.2.2"
+let-me-play-models = { path = "../models" }
+reqwest = { version = "0.13.5", features = ["json", "rustls"] }
+tokio-tungstenite = { version = "0.30.0", features = [
+    "rustls-tls-native-roots",
+] }
+futures-util = "0.3.34"
+serde_json = "1.0.154"
+log = "0.4.34"
+tracing-subscriber = "0.3.23"
