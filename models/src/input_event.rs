@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 
-use crate::mouse_input::MouseInput;
+use crate::{MouseMove, PressEvent};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum InputEvent {
-    Keyboard(char),
-    Mouse(MouseInput),
+    PressEvent(PressEvent),
+    MouseMove(MouseMove),
 }

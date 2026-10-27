@@ -1,5 +1,3 @@
-use std::error::Error;
-
 use enigo::{Enigo, Settings};
 use futures_util::{SinkExt, StreamExt};
 use let_me_play_models::{Event, NewRoomResponse};
@@ -22,7 +20,7 @@ mod requests;
 
 #[cfg(debug_assertions)]
 fn server_url(proto: &str) -> String {
-    format!("{proto}://127.0.0.1:8080")
+    format!("{proto}://127.0.0.1:8090")
 }
 
 #[cfg(not(debug_assertions))]

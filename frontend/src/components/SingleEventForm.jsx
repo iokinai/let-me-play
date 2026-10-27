@@ -17,6 +17,10 @@ export default function SingleEventForm({
   setMoveX,
   moveY,
   setMoveY,
+  actionType,
+  setActionType,
+  holdMs,
+  setHoldMs,
   isConnected,
   onSend,
 }) {
@@ -63,11 +67,11 @@ export default function SingleEventForm({
         </button>
       </div>
 
-      <div className="bg-slate-950/60 border border-slate-800/80 rounded-lg p-4">
+      <div className="bg-slate-950/60 border border-slate-800/80 rounded-lg p-4 flex flex-col gap-4">
         {singleCategory === "keyboard" && (
           <div className="flex flex-col gap-2">
             <label className="text-xs font-mono text-slate-400">
-              СИМВОЛ КЛАВИШИ (a-z)
+              СИМВОЛ КЛАВИШИ (a-z, 0-9)
             </label>
             <input
               type="text"
@@ -101,9 +105,42 @@ export default function SingleEventForm({
                       : "bg-slate-900 border-slate-700 text-slate-300"
                   }`}
                 >
-                  {btn.label} клик
+                  {btn.label} кнопка
                 </button>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Выбор режима (Click / Hold) для клавиатуры и кликов мыши */}
+        {singleCategory !== "mouse_move" && (
+          <div className="flex flex-col gap-2 pt-2 border-t border-slate-800/80">
+            <label className="text-xs font-mono text-slate-400">
+              РЕЖИМ (PRESS EVENT TYPE)
+            </label>
+            <div className="flex items-center gap-4">
+              <select
+                value={actionType}
+                onChange={(e) => setActionType(e.target.value)}
+                className="w-40 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-emerald-500"
+              >
+                <option value="click">Клик (Click)</option>
+                <option value="hold">Зажатие (Hold)</option>
+              </select>
+
+              {actionType === "hold" && (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono text-slate-400">
+                    Длительность (мс):
+                  </span>
+                  <input
+                    type="number"
+                    value={holdMs}
+                    onChange={(e) => setHoldMs(e.target.value)}
+                    className="w-24 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono text-amber-300 font-bold focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+              )}
             </div>
           </div>
         )}

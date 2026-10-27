@@ -7,7 +7,7 @@ import TerminalLogs from "./components/TerminalLogs";
 import ConfigModal from "./components/ConfigModal";
 
 export default function App() {
-  const serverUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8080";
+  const serverUrl = import.meta.env.VITE_BACKEND_URL;
 
   const [roomId, setRoomId] = useState("");
   const [isConnected, setIsConnected] = useState(false);
@@ -21,6 +21,8 @@ export default function App() {
   const [mouseBtn, setMouseBtn] = useState("Left");
   const [moveX, setMoveX] = useState(10);
   const [moveY, setMoveY] = useState(10);
+  const [actionType, setActionType] = useState("click"); // 'click' | 'hold'
+  const [holdMs, setHoldMs] = useState(500);
 
   // Форма Sequence Event
   const [sequenceList, setSequenceList] = useState([
@@ -31,6 +33,8 @@ export default function App() {
       button: "Left",
       x: 0,
       y: 0,
+      actionType: "click",
+      hold_ms: 500,
       delay_ms: 100,
     },
   ]);
@@ -53,30 +57,41 @@ export default function App() {
     setLogs((prev) => [newEntry, ...prev.slice(0, 99)]);
   }, []);
 
-  const buildSingleEvent = (category, key, button, x, y) => {
+  // Форматирование PressEventType под Serde: "Click" или { Hold: number }
+  const formatPressEventType = (type, ms) => {
+    if (type === "hold") {
+      return { Hold: parseInt(ms, 10) || 100 };
+    }
+    return "Click";
+  };
+
+  // Построение чистого InputEvent
+  const buildInputEvent = (category, key, button, x, y, actionTp, hMs) => {
+    const ty = formatPressEventType(actionTp, hMs);
+
     if (category === "keyboard") {
       return {
-        Input: {
-          Keyboard: key.toLowerCase() || "a",
+        PressEvent: {
+          Keyboard: {
+            button: (key && key.length > 0 ? key.toLowerCase() : "a")[0],
+            ty: ty,
+          },
         },
       };
     } else if (category === "mouse_click") {
       return {
-        Input: {
+        PressEvent: {
           Mouse: {
-            Click: button,
+            button: button, // "Left" или "Right"
+            ty: ty,
           },
         },
       };
     } else {
       return {
-        Input: {
-          Mouse: {
-            Move: {
-              x: parseInt(x, 10) || 0,
-              y: parseInt(y, 10) || 0,
-            },
-          },
+        MouseMove: {
+          x: parseInt(x, 10) || 0,
+          y: parseInt(y, 10) || 0,
         },
       };
     }
@@ -96,7 +111,6 @@ export default function App() {
       });
 
       if (!response.ok) {
-        // Пытаемся распарсить JSON ошибку сервера (если вернулась LmpServerError)
         let errorText = `HTTP ${response.status}`;
         try {
           const errData = await response.json();
@@ -113,30 +127,51 @@ export default function App() {
   };
 
   const handleSendSingle = () => {
-    const singleEv = buildSingleEvent(
+    const inputEv = buildInputEvent(
       singleCategory,
       keyChar,
       mouseBtn,
       moveX,
       moveY,
+      actionType,
+      holdMs,
     );
-    sendPayload({ Single: singleEv }, "ОДИНОЧНОЕ СОБЫТИЕ");
+
+    // Строгая структура: Event::Single(SingleEvent::Input(InputEvent))
+    const payload = {
+      Single: {
+        Input: inputEv,
+      },
+    };
+
+    sendPayload(payload, "ОДИНОЧНОЕ СОБЫТИЕ");
   };
 
   const handleSendSequence = () => {
     if (sequenceList.length === 0) return;
 
-    const formattedSequence = sequenceList.map((item) => ({
-      event: buildSingleEvent(
+    const formattedSequence = sequenceList.map((item) => {
+      // Строим такой же InputEvent, как для одиночного события
+      const inputEv = buildInputEvent(
         item.category,
         item.key,
         item.button,
         item.x,
         item.y,
-      ),
-      delay_ms: parseInt(item.delay_ms, 10) || 0,
-    }));
+        item.actionType,
+        item.hold_ms,
+      );
 
+      return {
+        // Обертка SingleEvent (структура такая же, как для Single)
+        event: {
+          Input: inputEv,
+        },
+        delay_ms: parseInt(item.delay_ms, 10) || 0,
+      };
+    });
+
+    // Структура: Event::Sequence(Vec<SequenceEvent>)
     sendPayload(
       { Sequence: formattedSequence },
       `ПОСЛЕДОВАТЕЛЬНОСТЬ (${sequenceList.length} шаг.)`,
@@ -153,6 +188,8 @@ export default function App() {
         button: "Left",
         x: 0,
         y: 0,
+        actionType: "click",
+        hold_ms: 500,
         delay_ms: 100,
       },
     ]);
@@ -223,6 +260,10 @@ export default function App() {
               setMoveX={setMoveX}
               moveY={moveY}
               setMoveY={setMoveY}
+              actionType={actionType}
+              setActionType={setActionType}
+              holdMs={holdMs}
+              setHoldMs={setHoldMs}
               isConnected={isConnected}
               onSend={handleSendSingle}
             />

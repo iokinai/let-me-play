@@ -17,7 +17,7 @@ export default function SequenceEventForm({
             последовательности
           </h2>
           <p className="text-xs text-slate-400 font-mono mt-0.5">
-            Пакетная отправка шагов с задержками delay_ms
+            Пакетная отправка шагов с поддержкой Hold и задержек delay_ms
           </p>
         </div>
         <button
@@ -50,7 +50,7 @@ export default function SequenceEventForm({
               <option value="mouse_move">Движение мыши</option>
             </select>
 
-            <div className="flex-1 flex items-center gap-3 min-w-50">
+            <div className="flex-1 flex items-center gap-3 min-w-50 flex-wrap">
               {item.category === "keyboard" && (
                 <div className="flex items-center gap-2">
                   <span className="text-slate-500">Символ:</span>
@@ -84,6 +84,38 @@ export default function SequenceEventForm({
                 </div>
               )}
 
+              {/* Выбор режима (Click / Hold) для клавиатуры и мыши */}
+              {item.category !== "mouse_move" && (
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-500">Режим:</span>
+                  <select
+                    value={item.actionType}
+                    onChange={(e) =>
+                      onUpdateStep(item.id, "actionType", e.target.value)
+                    }
+                    className="bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-slate-200 text-xs focus:outline-none"
+                  >
+                    <option value="click">Клик</option>
+                    <option value="hold">Зажатие</option>
+                  </select>
+                </div>
+              )}
+
+              {/* Поле длительности зажатия, если выбран Hold */}
+              {item.category !== "mouse_move" && item.actionType === "hold" && (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-slate-500">мс:</span>
+                  <input
+                    type="number"
+                    value={item.hold_ms}
+                    onChange={(e) =>
+                      onUpdateStep(item.id, "hold_ms", e.target.value)
+                    }
+                    className="w-16 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-amber-300 font-bold focus:outline-none"
+                  />
+                </div>
+              )}
+
               {item.category === "mouse_move" && (
                 <div className="flex items-center gap-2">
                   <span className="text-slate-500">X:</span>
@@ -106,14 +138,14 @@ export default function SequenceEventForm({
 
             <div className="flex items-center gap-2 shrink-0 border-l border-slate-800 pl-3">
               <Clock className="w-3.5 h-3.5 text-amber-400" />
-              <span className="text-slate-400">Задержка (мс):</span>
+              <span className="text-slate-400">Пауза после (мс):</span>
               <input
                 type="number"
                 value={item.delay_ms}
                 onChange={(e) =>
                   onUpdateStep(item.id, "delay_ms", e.target.value)
                 }
-                className="w-24 bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-amber-300 font-bold focus:outline-none"
+                className="w-20 bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-amber-300 font-bold focus:outline-none"
               />
             </div>
 
